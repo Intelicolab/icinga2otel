@@ -84,4 +84,5 @@ This project utilizes the following open-source libraries:
 - **spf13/pflag:** (License: BSD-3-Clause ) [https://github.com/spf13/pflag]
 
 "Icinga" is a trademark of Icinga GmbH
+
 "OpenTelemetry" is a trademark of The Linux Foundation.

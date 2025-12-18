@@ -1,7 +1,7 @@
 package client
 
 import (
-	"gms/icinga2otel/internal/config"
+	"github.com/mdetrano/icinga2otel/internal/config"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"

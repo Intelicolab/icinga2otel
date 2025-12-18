@@ -3,9 +3,9 @@ package main
 import (
 	"log/slog"
 	"io"
-	"gms/icinga2otel/internal/config"
-	"gms/icinga2otel/internal/producer"
-	"gms/icinga2otel/internal/consumer"
+	"github.com/mdetrano/icinga2otel/internal/config"
+	"github.com/mdetrano/icinga2otel/internal/producer"
+	"github.com/mdetrano/icinga2otel/internal/consumer"
 )
 
 func main() {

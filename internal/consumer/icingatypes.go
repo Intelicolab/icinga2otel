@@ -1,8 +1,8 @@
 package consumer
 
 import (
-	"gms/icinga2otel/internal/config"
-	"gms/icinga2otel/internal/objectcache"
+	"github.com/mdetrano/icinga2otel/internal/config"
+	"github.com/mdetrano/icinga2otel/internal/objectcache"
 	"encoding/json"
 	"fmt"
 	"log/slog"

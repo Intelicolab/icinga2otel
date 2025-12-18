@@ -1,9 +1,9 @@
 package producer
 
 import (
-	"gms/icinga2otel/internal/config"
-	"gms/icinga2otel/internal/client"
-	"gms/icinga2otel/internal/objectcache"
+	"github.com/mdetrano/icinga2otel/internal/config"
+	"github.com/mdetrano/icinga2otel/internal/client"
+	"github.com/mdetrano/icinga2otel/internal/objectcache"
 	"bufio"
 	"bytes"
 	"encoding/json"

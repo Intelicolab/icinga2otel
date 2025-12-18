@@ -37,9 +37,7 @@ For full configuration options run:
 ## Configuration
 
 All configuration options may be passed as command line arguments, environment variables, or via config file.  The options are the same in all formats except must be capitalized when set
-as environment variables (so the flag `--icinga_host` would become `ICINGA_HOST` as an environment variable).  A sample config file is included in config/config.toml which can be copied as a starting point.
-The configuration options are processed via Go's Viper module so yaml and json formats for the configuration are also possible.
-
+as environment variables (so the flag `--icinga_host` would become `ICINGA_HOST` as an environment variable).  A sample config file is included in config/config.toml.example which can be copied to config/config.toml and used as a starting point. The configuration options are processed via Go's Viper module so yaml and json formats for the configuration are also possible.
 
 ## Secure Options
 

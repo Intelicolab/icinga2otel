@@ -1,0 +1,13 @@
+
+//icinga_host = "localhost"
+//icinga_user = "api_user"
+//icinga_pass = "api_pass"
+//icinga_certificate = "icinga_ca.crt"
+//icinga_insecure_host = true
+
+//otel_exporter_otlp_endpoint = "http://localhost:4317"
+//otel_exporter_otlp_protocol = "grpc"
+//otel_exporter_otlp_compression = "gzip"
+
+//debug = true
+//verbose = true

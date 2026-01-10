@@ -25,6 +25,10 @@ import (
 	"os/signal"
 	"syscall"
 	"sync"
+	"crypto/tls"
+	"crypto/x509"
+	"google.golang.org/grpc/credentials"
+
 )
 
 //----
@@ -58,7 +62,12 @@ func init() {
 	//config package makes sure this is set
 	if os.Getenv("OTEL_EXPORTER_OTLP_LOGS_PROTOCOL") == "grpc" {
 		slog.Info("Initialzing grpc logger.")
-		exporter, err = otlploggrpc.New(ctx)
+		if os.Getenv("OTEL_EXPORTER_OTLP_CERTIFICATE") != "" || os.Getenv("OTEL_EXPORTER_OTLP_LOGS_CERTIFICATE") != "" { // work around bug https://github.com/open-telemetry/opentelemetry-go/issues/6661
+			creds := credentials.NewTLS(getTlsConfig())
+			exporter, err = otlploggrpc.New(ctx, otlploggrpc.WithTLSCredentials(creds) )
+		} else {
+			exporter, err = otlploggrpc.New(ctx )
+		}
 	} else {
 		slog.Info("Initialzing http logger.")
 		exporter, err = otlploghttp.New(ctx)
@@ -219,6 +228,36 @@ func updateCache(e IcingaEvent) {
 	case "Host":
 		objectcache.RefreshHosts(e.ObjectName)
 	}
+}
+
+
+// need to set this up manually for Logs exporter as workaround to  https://github.com/open-telemetry/opentelemetry-go/issues/6661
+func getTlsConfig() (*tls.Config) {
+
+	certPool := x509.NewCertPool()
+
+	certFile := os.Getenv("OTEL_EXPORTER_OTLP_LOG_CERTIFICATE")
+	if certFile == "" {
+		certFile = os.Getenv("OTEL_EXPORTER_OTLP_CERTIFICATE")
+	}
+
+	if certFile != "" {
+		if certPEM, err := os.ReadFile(certFile); err != nil {
+			slog.Warn("Otel Exporter Certfile was specified but could not be read.","error", err)
+		} else {
+			if ok := certPool.AppendCertsFromPEM(certPEM); !ok {
+				slog.Warn("Otel Exporter Certfile was specified but could not be added.")
+			} else {
+				slog.Info("Otel Exporter certificate added.")
+			}
+		}
+	}
+
+	tlsConfig := &tls.Config{
+                RootCAs: certPool,
+	}
+
+	return tlsConfig
 }
 
 func Otel(reader *io.PipeReader) {

@@ -231,7 +231,7 @@ func (pv *PerfdataValue) MetricAttributes() (attrs []attribute.KeyValue) {
 
 }
 
-// Pass in additional attributes to add, and the timestamp for the metric.  this will add the PerfdataValue Metric Attibutes 
+// Pass in additional attributes to add (clone the slice!), and the timestamp for the metric.  this will add the PerfdataValue Metric Attibutes
 func (pv *PerfdataValue) GetOtelMetric(attrs []attribute.KeyValue, metricTime time.Time) (pdv_metric metricdata.Metrics) {
 
 	var pointAttributes []attribute.KeyValue = append(attrs, pv.MetricAttributes()...)

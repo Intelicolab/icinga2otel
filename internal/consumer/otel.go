@@ -28,6 +28,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"google.golang.org/grpc/credentials"
+	"slices"
 
 )
 
@@ -139,7 +140,7 @@ func sendMetric(event IcingaEvent) {
 
 	for _, pdv := range event.CheckResult.PerformanceData {
 		slog.Debug("Processing metric.", "label", pdv.Label)
-		cMetrics <- pdv.GetOtelMetric(pointAttributes, metricTime)
+		cMetrics <- pdv.GetOtelMetric(slices.Clone(pointAttributes), metricTime)
 	}
 }
 

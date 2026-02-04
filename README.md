@@ -53,7 +53,7 @@ If using Basic Auth to the OpenTelemetry collector, the credentials may be passe
 
 The credentials for Icinga or the OpenTelemetry collector may be passed via file by specifying the path to the file in `icinga_pass_file` or `collector_pass_file`, and **not** configuring `icinga_pass` or `collector_pass` otherwise.
 
-Additional authentication methods may be sepcified by using the option `collector_auth_type`.  In this case the value for the `collector_pass` (or from `collector_pass_file`) will be used as the authorization parameter.  icinga2otel will construct the Authorization header with that information.  For instance, setting `--collector_auth_type ApiKey` and `--collecor_pass tkn98765DCBA`  would set the "Authorization: ApiKey tkn9876DCBA" HTTP header when sending data to the OpenTelemetry collector system.
+Additional authentication methods may be specified by using the option `collector_auth_type`.  In this case the value for the `collector_pass` (or from `collector_pass_file`) will be used as the authorization parameter.  icinga2otel will construct the Authorization header with that information.  For instance, setting `--collector_auth_type ApiKey` and `--collecor_pass tkn98765DCBA`  would set the "Authorization: ApiKey tkn9876DCBA" HTTP header when sending data to the OpenTelemetry collector system.
 
 ## Data and Performance Options
 

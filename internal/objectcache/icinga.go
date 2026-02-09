@@ -2,8 +2,8 @@ package objectcache
 
 import (
 	"log/slog"
-	"github.com/mdetrano/icinga2otel/internal/config"
-	"github.com/mdetrano/icinga2otel/internal/client"
+	"github.com/Intelicolab/icinga2otel/internal/config"
+	"github.com/Intelicolab/icinga2otel/internal/client"
 	"net/http"
 	"fmt"
 	"encoding/json"

@@ -1,4 +1,4 @@
-module github.com/mdetrano/icinga2otel
+module github.com/Intelicolab/icinga2otel
 
 go 1.25.3
 

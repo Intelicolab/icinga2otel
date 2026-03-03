@@ -6,7 +6,7 @@ and sending the data as logs or metrics to the OpenTelemetry collecting system. 
 list of attributes from the monitored Hosts and Services may be included with the data records.
 
 ## Requirements
-Support for the Go language on system running icinga2otel
+Support for the Go language on system running icinga2otel, or a Docker environment if using the container image.
 
 An Icinga2 monitor with an API user setup with the following permissions:
 >  permissions = [ "objects/query/\*", "events/\*" ]
@@ -15,23 +15,43 @@ An OpenTelemetry collector (or system implementing the protocol).
 
 ## Installation
 
-Obtain source files.  In the root directory of the source run:
+### Source
 
->go mod download
+Obtain source files, and prepare Go dependencies:
 
-(once, to obtain required dependencies for this project)
+```
+git clone https://github.com/Intelicolab/icinga2otel.git
+cd icinga2otel
+go mod download
+```
 
-Optionally, compile an executable icinga2otel binary:
->go build .
+Optionally, compile an executable icinga2otel binary from the prepared source:
 
+`go build .`
+
+### Docker
+
+A docker image is available that can be used instead of installing the software directly.
+
+`docker image pull ghcr.io/intelicolab/icinga2otel:latest`
 
 ## Usage
 
 ### Quickstart, insecure example
->go run . --icinga_insecure --icinga_host {ip address of icinga monitor} --icinga_user {icinga api user} --icinga_pass {password for icinga api user} --otel_exporter_otlp_endpoint {address and port of OpenTelemetry collector}
+
+`go run . --icinga_insecure --icinga_host {ip address of icinga monitor} --icinga_user {icinga api user} --icinga_pass {password for icinga api user} --otel_exporter_otlp_endpoint {address and port of OpenTelemetry collector}`
+
+Or, with Docker:
+
+`docker run --rm ghcr.io/intelicolab/icinga2otel --icinga_insecure --icinga_host {ip address of icinga monitor} --icinga_user {icinga api user} --icinga_pass {password for icinga api user} --otel_exporter_otlp_endpoint {address and port of OpenTelemetry collector}`
 
 For full configuration options run:
->go run . --help
+
+`go run . --help`
+
+Or,
+
+`docker run --rm ghcr.io/intelicolab/icinga2otel --help`
 
 
 ## Configuration
@@ -69,11 +89,11 @@ The `batch_size` option controls how many metrics will be stored in memory befor
 
 The `batch_time` option limits how much time metrics will be stored in memory before being flushed to the collector, regardless of whether `batch_size` was reached.
 
-## Docker Container
+## Docker Image
 
-A Dockerfile is included to build a container image.  To create:
+A Dockerfile is included to build a container image locally.  To create:
 
->docker build . -t icinga2otel
+`docker build . -t icinga2otel`
 
 ## Acknowledgements
 

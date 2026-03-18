@@ -325,7 +325,8 @@ func setLogLevel() {
 //Compile the regexes and setup the Metric Munges Slice
 func prepareMetricMunges(reader *viper.Viper) {
 
-	specs := reader.GetStringSlice("metric_munge")
+	var specs []string
+	reader.UnmarshalKey("metric_munge",&specs)
 
 	for _, spec := range specs {
 

@@ -14,6 +14,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"time"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
+	semconv "go.opentelemetry.io/otel/semconv/v1.32.0"
 )
 
 var (
@@ -214,6 +215,8 @@ func (pv *PerfdataValue) parseString(data string) error {
 //Get the attributes to add from the perfdata fields, if they were present
 func (pv *PerfdataValue) MetricAttributes() (attrs []attribute.KeyValue) {
 
+	attrs = append(attrs, attribute.String("metric.orig.name", pv.Label))
+
 	if pv.Warn != nil {
 		attrs = append(attrs, attribute.Float64("warn", *pv.Warn))
 	}
@@ -231,15 +234,35 @@ func (pv *PerfdataValue) MetricAttributes() (attrs []attribute.KeyValue) {
 
 }
 
+func (pv *PerfdataValue) MungeMetricName() (munged string) {
+
+	munged = pv.Label
+
+	if len(config.Config.MetricMunges) != 0 {
+		for _, m := range config.Config.MetricMunges {
+			munged = m.Search.ReplaceAllString(pv.Label, m.Replace)
+			if munged != pv.Label { //first match that results in change "wins"
+				slog.Debug("munged metric name", "orig", pv.Label, "munged", munged)
+				return
+			}
+		}
+	}
+
+	return
+
+}
+
 // Pass in additional attributes to add (clone the slice!), and the timestamp for the metric.  this will add the PerfdataValue Metric Attibutes
 func (pv *PerfdataValue) GetOtelMetric(attrs []attribute.KeyValue, metricTime time.Time) (pdv_metric metricdata.Metrics) {
 
 	var pointAttributes []attribute.KeyValue = append(attrs, pv.MetricAttributes()...)
 
+
+
 	if pv.Counter {
 		slog.Debug("Processing as counter.")
 		pdv_metric = metricdata.Metrics{
-			Name: pv.Label,
+			Name: pv.MungeMetricName(),
 			Data: metricdata.Sum[int64]{
 				IsMonotonic: true,
 				Temporality: metricdata.CumulativeTemporality,
@@ -255,7 +278,7 @@ func (pv *PerfdataValue) GetOtelMetric(attrs []attribute.KeyValue, metricTime ti
 	} else {
 		slog.Debug("Processing as gauge.")
 		pdv_metric = metricdata.Metrics{
-			Name: pv.Label,
+			Name: pv.MungeMetricName(),
 			Data: metricdata.Gauge[float64]{
 				DataPoints: []metricdata.DataPoint[float64]{
 					{
@@ -504,8 +527,8 @@ func (e IcingaEvent) LogMessage() string {
 func (e IcingaEvent) OtelLogAttributes() (attrs []apiLog.KeyValue) {
 
 	hostname, servicename, _ := e.MonObjectNames()
-	attrs = append(attrs, apiLog.String("host", hostname))
-	attrs = append(attrs, apiLog.String("service", servicename))
+	attrs = append(attrs, apiLog.KeyValueFromAttribute(semconv.HostName(hostname)))
+	attrs = append(attrs, apiLog.KeyValueFromAttribute(semconv.ServiceName(servicename)))
 	attrs = append(attrs, apiLog.String("type", e.Type))
 	attrs = append(attrs, apiLog.String("object_type", e.MonObjectType().String()))
 
@@ -578,8 +601,8 @@ func (e IcingaEvent) ObjectLogAttributes() (attrs []apiLog.KeyValue) {
 func (e IcingaEvent) OtelMetricAttributes() (attrs []attribute.KeyValue) {
 
 	hostname, servicename, _ := e.MonObjectNames()
-	attrs = append(attrs, attribute.String("host", hostname))
-	attrs = append(attrs, attribute.String("service", servicename))
+	attrs = append(attrs, semconv.HostName(hostname))
+	attrs = append(attrs, semconv.ServiceName(servicename))
 	attrs = append(attrs, attribute.String("object_type", e.MonObjectType().String()))
 
 	attrs = append(attrs, e.ObjectMetricAttributes()...)

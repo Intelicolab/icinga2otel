@@ -11,7 +11,13 @@ import (
 	"fmt"
 	"encoding/base64"
 	"golang.org/x/net/http/httpguts"
+	"regexp"
 )
+
+type Munge struct {
+	Search *regexp.Regexp
+	Replace string
+}
 
 type sConfig struct {
 	IcingaHosts []string `mapstructure:"icinga_host"`
@@ -30,12 +36,13 @@ type sConfig struct {
 	MetricScopeName	string `mapstructure:"metric_scope_name"`
 	LogAttrs	[]string `mapstructure:"log_attrs"`
 	MetricAttrs	[]string `mapstructure:"metric_attrs"`
+	MetricMunges []Munge
 	Quiet     bool
 	Debug       bool
 	RetryDelay time.Duration `mapstructure:"retry_delay"`
 	BatchSize int `mapstructure:"batch_size"`
 	BatchTime time.Duration `mapstructure:"batch_time"`
-	Workers int
+	Workers int `mapstructure:"workers"`
 	CollectorUser  string `mapstructure:"collector_user"`
 	CollectorPass  string `mapstructure:"collector_pass"`
 	CollectorPassFile  string `mapstructure:"collector_pass_file"`
@@ -74,6 +81,7 @@ func init() {
         pflag.String("metric_scope_name", "monitor.metrics", "Scope Name for Metrics")
 	pflag.StringSlice("log_attrs",[]string{},"List of object attributes to include in logs. (e.g. host.address,service.vars.SERVICE_TYPE) .")
 	pflag.StringSlice("metric_attrs",[]string{},"List of object attributes to include in metrics. (e.g. host.address,service.vars.SERVICE_TYPE) .")
+	pflag.StringSlice("metric_munge",[]string{},"List of specs to modify metric names, in the form {regex};{replace} .  Comma separated list. Original metric name always included in metric.orig.name attribute.")
 
 	pflag.String("otel_service_name", "monitor", "Open Telemetry's OTEL_SERVICE_NAME")
 	pflag.String("otel_exporter_otlp_endpoint", "http://localhost:4317", "Open Telemetry's OTEL_EXPORTER_OTLP_ENDPOINT")
@@ -143,6 +151,8 @@ func init() {
 	setOtelProtocols()
 
 	setLogLevel()
+
+	prepareMetricMunges(reader)
 
 
 }
@@ -311,3 +321,25 @@ func setLogLevel() {
 	slog.SetDefault(slog.New(handlerOpts))
 
 }
+
+//Compile the regexes and setup the Metric Munges Slice
+func prepareMetricMunges(reader *viper.Viper) {
+
+	specs := reader.GetStringSlice("metric_munge")
+
+	for _, spec := range specs {
+
+		parts := strings.Split(spec,";")
+
+		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+			fmt.Printf("Bad munge spec.  Form should be {regex};{replace} . Got: '%s'\n", spec) 
+			os.Exit(1)
+		}
+		re := regexp.MustCompile(parts[0])
+		Config.MetricMunges = append(Config.MetricMunges, Munge{Search: re, Replace: parts[1]} )
+	}
+
+
+}
+
+
